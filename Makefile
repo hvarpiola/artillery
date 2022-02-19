@@ -1,27 +1,40 @@
-TARGET = 8-chip
-LIBS = -lm -lSDL2
-CC = gcc
-CFLAGS = -g -Wall
+UNAME_S = $(shell uname -s)
 
-.PHONY: default all clean
+CC = g++
+CFLAGS = -std=c11 -O3 -g -Wall -Wextra -Wpedantic -Wstrict-aliasing
+#CFLAGS += -Wno-pointer-arith -Wno-newline-eof -Wno-unused-parameter -Wno-gnu-statement-expression
+#CFLAGS += -Wno-gnu-compound-literal-initializer -Wno-gnu-zero-variadic-macro-arguments
+#CFLAGS += -Ilib/cglm/include -Ilib/glad/include -Ilib/glfw/include -Ilib/stb -Ilib/noise -fbracket-depth=1024
+LDFLAGS =  -lm -lSDL2
 
-default: $(TARGET)
-all: default
+# GLFW required frameworks on OSX
+#ifeq ($(UNAME_S), Darwin)
+	#LDFLAGS += -framework OpenGL -framework IOKit -framework CoreVideo -framework Cocoa
+#endif
 
-OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
-HEADERS = $(wildcard *.h)
+#ifeq ($(UNAME_S), Linux)
+	#LDFLAGS += -ldl -lpthread
+#endif
 
-%.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -c $< -o $@
+SRC  = $(wildcard src/**/*.cpp) $(wildcard src/*.cpp) $(wildcard src/**/**/*.cpp) $(wildcard src/**/**/**/*.cpp)
+OBJ  = $(SRC:.c=.o)
+BIN = bin
 
-.PRECIOUS: $(TARGET) $(OBJECTS)
+.PHONY: all clean
 
-$(TARGET): $(OBJECTS)
-	$(CC) $(OBJECTS) -Wall $(LIBS) -o $@
+all: dirs game
+
+dirs:
+	mkdir -p ./$(BIN)
+
+run: all
+	$(BIN)/game
+
+game: $(OBJ)
+	$(CC) -o $(BIN)/game $^ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) -o $@ -c $< $(CFLAGS)
 
 clean:
-	rm -f *.o
-	rm -f $(TARGET)
-
-run:
-	./$(TARGET) 
+	rm -rf $(BIN) $(OBJ)
