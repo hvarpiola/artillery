@@ -7,6 +7,5 @@ int main(int argc, char* argv[])
 
     game->init();
 
-    while (1)
-        game->render();
+    game->run();
 }
