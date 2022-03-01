@@ -1,55 +1,86 @@
-#include "game.h"
+#include "Game.h"
 
 Game::~Game()
 {
-    // SDL_FreeSurface(m_
+    SDL_DestroyWindow(m_window);
+    SDL_DestroyRenderer(m_renderer);
+    delete m_player;
+    SDL_Quit();
 }
 
 int Game::init()
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-        std::cout << "sdl init failed with error: " << SDL_GetError() << std::endl;
+        SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR, "sdl init failed with error %s\n", SDL_GetError());
         return 0;
     }
+
+    // Initialize logging
+    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_WARN);
 
     // create window
     m_window = SDL_CreateWindow("Artilery game", SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED, m_screen_x, m_screen_y, SDL_WINDOW_SHOWN);
+        SDL_WINDOWPOS_UNDEFINED, m_screen_x, m_screen_y, 0);
 
     if (m_window == NULL) {
         std::cout << "SDL_Create window failed with error: " << SDL_GetError() << std::endl;
+        SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR, "SDL_Create window failed with error: %s\n", SDL_GetError());
         return 0;
     }
+
+    // Initialize renderer
+    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_SOFTWARE);
+
+    if (m_renderer == NULL) {
+        SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR, "Renderer init failed %s", SDL_GetError());
+        return 0;
+    }
+
+    SDL_SetRenderDrawColor(m_renderer, 255, 255, 255, 255);
 
     // Initialize PNG loading
     static int imgFlags = IMG_INIT_PNG;
     if (!(IMG_Init(imgFlags) & imgFlags)) {
-        std::cout << "IMG_Init failed for PNG image with error: " << IMG_GetError() << std::endl;
+        SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_ERROR, "IMG_Init failed for PNG image with error: %s\n", SDL_GetError());
         return 0;
     }
-
     // Get screen surface
-    m_screen_surface = SDL_GetWindowSurface(m_window);
-
-    m_PGNSurface = Game::load_surface("./media/map1_ground.png");
-    if (m_PGNSurface == NULL) {
-        std::cout << "failed to load png image" << std::endl;
-        return 0;
-    }
-
-    m_tank = Game::load_surface("./media/tank.png");
-    if (m_tank == NULL) {
-        std::cout << "Failed to load tank image " << std::endl;
-        return 0;
-    }
-    // SDL_FillRect(m_screen_surface, NULL, SDL_MapRGB(m_screen_surface->format, 0xff, 0xff, 0xff));
-
+    // m_screen_surface = SDL_GetWindowSurface(m_window);
+    SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Inits completed");
     return 1;
+
+    TextureManager::the()->load("./media/tank.png", "tank", m_renderer);
+
+    m_player = new Player("Jorma");
+
+    m_player->load(100, 100, 100, 100, "tank");
 }
 
 void Game::render()
 {
-    SDL_UpdateWindowSurface(m_window);
+    SDL_RenderClear(m_renderer);
+    m_player->draw(m_renderer);
+    SDL_RenderPresent(m_renderer);
+}
+
+void Game::update()
+{
+    m_player->update();
+}
+
+void Game::handle_events()
+{
+    SDL_Event event;
+    if (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        case SDL_QUIT:
+            m_running = false;
+            break;
+
+        default:
+            break;
+        }
+    }
 }
 
 void Game::run()
