@@ -2,6 +2,7 @@
 
 #include "TextureManager.h"
 #include <SDL2/SDL.h>
+#include <iostream>
 #include <string>
 
 // Game objects base class
@@ -22,7 +23,10 @@ public:
     {
         TextureManager::the()->draw_frame(m_texture_id, m_x, m_y, m_width, m_height, m_current_row, m_current_frame, renderer);
     }
-    virtual void update() { }
+    virtual void update()
+    {
+        std::cout << "@ Gameobject::update()" << std::endl;
+    }
     virtual void clean() { }
 
 protected:

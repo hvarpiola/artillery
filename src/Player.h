@@ -21,7 +21,10 @@ public:
     // GameObject::draw(renderer);
     //}
 
-    // void update();
+    // void update() override
+    //{
+    // std::cout << "@Player::update()" << std::endl;
+    //}
     void clear();
 
 private:

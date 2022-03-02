@@ -47,13 +47,13 @@ int Game::init()
     // Get screen surface
     // m_screen_surface = SDL_GetWindowSurface(m_window);
     SDL_LogMessage(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO, "Inits completed");
-    return 1;
 
     TextureManager::the()->load("./media/tank.png", "tank", m_renderer);
 
     m_player = new Player("Jorma");
 
     m_player->load(100, 100, 100, 100, "tank");
+    return 1;
 }
 
 void Game::render()
@@ -65,6 +65,8 @@ void Game::render()
 
 void Game::update()
 {
+    std::cout << "@Game::update()" << std::endl;
+
     m_player->update();
 }
 
@@ -125,11 +127,11 @@ SDL_Surface* Game::load_surface(std::string path)
     return Optimized_image;
 }
 
-SDL_Texture* load_texture(std::string path)
-{
+// SDL_Texture* load_texture(std::string path)
+//{
 
-    SDL_Texture* texture = NULL;
+// SDL_Texture* texture = NULL;
 
-    // TODO: Check for SDL_Logmessage stuff
-    return texture;
-}
+//// TODO: Check for SDL_Logmessage stuff
+// return texture;
+//}

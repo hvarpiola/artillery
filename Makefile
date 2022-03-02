@@ -1,40 +1,52 @@
-UNAME_S = $(shell uname -s)
+CXX      := -c++
+CXXFLAGS := -pedantic-errors -Wall -Wextra -Werror
+LDFLAGS  := -L/usr/lib -lstdc++ -lm -lSDL2 -lSDL2_image
+BUILD    := ./
+OBJ_DIR  := $(BUILD)/obj
+APP_DIR  := $(BUILD)/bin
+TARGET   := game
+INCLUDE  := -Iinclude/
+SRC      :=                      \
+   $(wildcard src/*.cpp)         \
 
-CC = g++
-CFLAGS = -std=c11 -O3 -g -Wall -Wextra -Wpedantic -Wstrict-aliasing
-#CFLAGS += -Wno-pointer-arith -Wno-newline-eof -Wno-unused-parameter -Wno-gnu-statement-expression
-#CFLAGS += -Wno-gnu-compound-literal-initializer -Wno-gnu-zero-variadic-macro-arguments
-#CFLAGS += -Ilib/cglm/include -Ilib/glad/include -Ilib/glfw/include -Ilib/stb -Ilib/noise -fbracket-depth=1024
-LDFLAGS =  -lm -lSDL2 -lSDL2_image 
+OBJECTS  := $(SRC:%.cpp=$(OBJ_DIR)/%.o)
+DEPENDENCIES \
+         := $(OBJECTS:.o=.d)
 
-# GLFW required frameworks on OSX
-#ifeq ($(UNAME_S), Darwin)
-	#LDFLAGS += -framework OpenGL -framework IOKit -framework CoreVideo -framework Cocoa
-#endif
+all: build $(APP_DIR)/$(TARGET)
 
-#ifeq ($(UNAME_S), Linux)
-	#LDFLAGS += -ldl -lpthread
-#endif
+$(OBJ_DIR)/%.o: %.cpp
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -MMD -o $@
 
-SRC  = $(wildcard src/**/*.cpp) $(wildcard src/*.cpp) $(wildcard src/**/**/*.cpp) $(wildcard src/**/**/**/*.cpp)
-OBJ  = $(SRC:.c=.o)
-BIN = bin
+$(APP_DIR)/$(TARGET): $(OBJECTS)
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -o $(APP_DIR)/$(TARGET) $^ $(LDFLAGS)
 
-.PHONY: all clean
+-include $(DEPENDENCIES)
 
-all: dirs game
+.PHONY: all build clean debug release info
 
-dirs:
-	mkdir -p ./$(BIN)
+build:
+	@mkdir -p $(APP_DIR)
+	@mkdir -p $(OBJ_DIR)
 
-run: all
-	$(BIN)/game
+debug: CXXFLAGS += -DDEBUG -g
+debug: all
 
-game: $(OBJ)
-	$(CC) -o $(BIN)/game $^ $(LDFLAGS)
-
-%.o: %.c
-	$(CC) -o $@ -c $< $(CFLAGS)
+release: CXXFLAGS += -O2
+release: all
 
 clean:
-	rm -rf $(BIN) $(OBJ)
+	-@rm -rvf $(OBJ_DIR)/*
+	-@rm -rvf $(APP_DIR)/*
+
+run:
+	$(APP_DIR)/$(TARGET)
+
+info:
+	@echo "[*] Application dir: ${APP_DIR}     "
+	@echo "[*] Object dir:      ${OBJ_DIR}     "
+	@echo "[*] Sources:         ${SRC}         "
+	@echo "[*] Objects:         ${OBJECTS}     "
+	@echo "[*] Dependencies:    ${DEPENDENCIES}"
