@@ -26,3 +26,5 @@ private:
 
     static TextureManager* s_instance;
 };
+
+SDL_Texture* load_texture(std::string file_name, SDL_Renderer* renderer);

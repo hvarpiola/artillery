@@ -68,3 +68,24 @@ void TextureManager::draw_rotated(std::string id, int x, int y, int width, int h
 
     SDL_RenderCopyEx(renderer, m_texture_map[id], &src_rect, &dest_rect, angle, center, flip);
 }
+
+SDL_Texture* load_texture(std::string file_name, SDL_Renderer* renderer)
+{
+
+    SDL_Surface* temp_surface = 0;
+    temp_surface = IMG_Load(file_name.c_str());
+
+    if (!temp_surface)
+        return nullptr;
+
+    SDL_Texture* texture;
+    texture = SDL_CreateTextureFromSurface(renderer, temp_surface);
+
+    SDL_FreeSurface(temp_surface);
+
+    if (texture)
+        return texture;
+
+    // should not get here, something has to be failing
+    return nullptr;
+};
