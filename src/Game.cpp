@@ -50,7 +50,7 @@ int Game::init()
 
     TextureManager::the()->load("./media/tank.png", "tank", m_renderer);
 
-    m_player = new Player("Jorma");
+    m_player = new Player("Jorma", 0, 0, m_renderer);
 
     m_player->load(100, 100, 100, 100, "tank");
     return 1;
@@ -65,7 +65,7 @@ void Game::render()
 
 void Game::update()
 {
-    std::cout << "@Game::update()" << std::endl;
+    // std::cout << "@Game::update()" << std::endl;
 
     m_player->update();
 }

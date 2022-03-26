@@ -25,7 +25,7 @@ public:
     }
     virtual void update()
     {
-        std::cout << "@ Gameobject::update()" << std::endl;
+        // std::cout << "@ Gameobject::update()" << std::endl;
     }
     virtual void clean() { }
 
